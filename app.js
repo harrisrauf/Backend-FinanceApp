@@ -7,6 +7,7 @@ let cors=require('cors')
 
 var expenseRouter = require('./routes/expense');
 var incomeRouter = require('./routes/income');
+var authRouter = require ('./routes/auth')
 /*f2*/
 var app = express();
 
@@ -22,6 +23,7 @@ app.use(cors());
 
 app.use('/expense', expenseRouter);
 app.use('/income', incomeRouter);
+app.use('/auth',authRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
