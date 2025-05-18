@@ -1,10 +1,11 @@
 let express = require('express');
 let executeQuery = require('../DB/db')
+var {verifyUser} = require('../services/auth')
 let router = express.Router();
 
 
 
-router.get('/', async (req, res) => {
+router.get('/', verifyUser, async (req, res) => {
     result = await executeQuery('select * from public.expense ORDER BY date DESC');
     console.log(result)
     res.send(result.rows);
@@ -13,7 +14,7 @@ router.get('/', async (req, res) => {
 
 router.get('/total', async (req, res) => {
     var expenses = 0
-    expenses= await executeQuery('SELECT SUM(price) FROM public.expense')
+    expenses = await executeQuery('SELECT SUM(price) FROM public.expense')
     res.send(expenses.rows)
 });
 
@@ -36,19 +37,19 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
     let { price, description, date } = req.body;
-    price=Number(price)
+    price = Number(price)
 
     if (!date || !description || !price) {
         res.sendStatus(400)
         return
     }
-        if (price<0){
+    if (price < 0) {
         res.sendStatus(400)
         return
     }
-    try{
-    result = await executeQuery("INSERT INTO public.expense(price, description, date) VALUES ( $1,$2,$3)", [price, description, date]);
-    } catch(error){
+    try {
+        result = await executeQuery("INSERT INTO public.expense(price, description, date) VALUES ( $1,$2,$3)", [price, description, date]);
+    } catch (error) {
         res.sendStatus(400)
     }
 
@@ -56,7 +57,7 @@ router.post('/', async (req, res) => {
 
 })
 
-/*lifecycle hooks vue*/
+/*middleware,jwt*/
 
 router.put('/:id', async (req, res) => {
     id = req.params.id
@@ -64,13 +65,13 @@ router.put('/:id', async (req, res) => {
         res.sendStatus(400)
         return
     }
-    let {price, desc, date } = req.body;
-    price=Number(price)
+    let { price, desc, date } = req.body;
+    price = Number(price)
     if (!date || !desc || !price) {
         res.sendStatus(400)
         return
     }
-    if (price<0){
+    if (price < 0) {
         res.sendStatus(400)
         return ('Price can not be negative')
     }
@@ -79,10 +80,10 @@ router.put('/:id', async (req, res) => {
         res.sendStatus(404)
         return
     }
-    try{
-    await executeQuery('UPDATE public.expense SET price= $1 , description= $2 , date= $3 WHERE id= $4 ', [price, desc, date, id])
-    res.sendStatus(200)
-    } catch(error){
+    try {
+        await executeQuery('UPDATE public.expense SET price= $1 , description= $2 , date= $3 WHERE id= $4 ', [price, desc, date, id])
+        res.sendStatus(200)
+    } catch (error) {
         res.sendStatus(400)
     }
 })
